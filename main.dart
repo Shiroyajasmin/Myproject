@@ -1,159 +1,58 @@
+import 'package:demo_sqflite/Model.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: demofuturebuilder(),
+    home: demo(),
   ));
 }
 
-class demofuturebuilder extends StatefulWidget {
-  const demofuturebuilder({Key? key}) : super(key: key);
+class demo extends StatefulWidget {
+  const demo({Key? key}) : super(key: key);
 
   @override
-  State<demofuturebuilder> createState() => _demofuturebuilderState();
+  State<demo> createState() => _demoState();
 }
 
-class _demofuturebuilderState extends State<demofuturebuilder> {
+class _demoState extends State<demo> {
+  int? cnt;
 
-  Future<List> getAllMovies() async {
-    await Future.delayed(Duration(seconds: 4));
 
-    List l = ["Movie 1", "Movie 2", "Movie 3", "Movie 4"];
+  bool status = false;
 
-    return l;
+  @override
+  void initState() {
+    super.initState();
+    initPref();
   }
 
-  Future<List> getAllWebseries() async {
-    await Future.delayed(Duration(seconds: 8));
-
-    List l = ["Season 1", "Season 2", "Season 3", "Season 4"];
-
-    return l;
-  }
-
-  getAllChannles() async {
-    await Future.delayed(Duration(seconds: 3));
-
-    List l = ["Season 1", "Season 2", "Season 3", "Season 4"];
-
-
+  initPref() async {
+    Model.prefs = await SharedPreferences.getInstance();
+    cnt = Model.prefs!.getInt("abc") ?? 0;
+    status = true;
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("FutureBuilder"),
-      ),
-      body: Column(
-        children: [
-          Container(
-            height: 100,
-            child: FutureBuilder(
-              future: getAllMovies(),
-              builder: (context, snapshot) {
+      body: status
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("$cnt"),
+                ElevatedButton(
+                    onPressed: () async {
+                      cnt = (cnt! + 1);
 
-                if(snapshot.connectionState==ConnectionState.done)
-                {
-                  if(snapshot.hasData)
-                  {
-
-                    List? l = snapshot.data;
-
-                    return ListView.builder(scrollDirection: Axis.horizontal,itemCount: l!.length,itemBuilder: (context, index) {
-                      return Container(
-                        height: 100,
-                        width: 100,
-                        color: Colors.black26,
-                        margin: EdgeInsets.all(10),
-                        child: Text("${l[index]}"),
-                      );
-                    },);
-                  }
-                  else if (snapshot.hasError){
-                    return Text("No data found");
-                  }
-                  else
-                  {
-                    return Text("No data found");
-                  }
-                }
-                return Center(child: CircularProgressIndicator());
-              },
-            ),
-          ),
-          Container(
-            height: 100,
-            child: FutureBuilder(
-              future: getAllWebseries(),
-              builder: (context, snapshot) {
-
-                if(snapshot.connectionState==ConnectionState.done)
-                {
-                  if(snapshot.hasData)
-                  {
-
-                    List? l = snapshot.data;
-
-                    return ListView.builder(scrollDirection: Axis.horizontal,itemCount: l!.length,itemBuilder: (context, index) {
-                      return Container(
-                        height: 100,
-                        width: 100,
-                        color: Colors.black26,
-                        margin: EdgeInsets.all(10),
-                        child: Text("${l[index]}"),
-                      );
-                    },);
-                  }
-                  else if (snapshot.hasError){
-                    return Text("No data found");
-                  }
-                  else
-                  {
-                    return Text("No data found");
-                  }
-                }
-                return Center(child: CircularProgressIndicator());
-              },
-            ),
-          ),
-          Container(
-            height: 100,
-            child: FutureBuilder(
-              future: getAllChannles(),
-              builder: (context, snapshot) {
-
-                if(snapshot.connectionState==ConnectionState.done)
-                {
-                  if(snapshot.hasData)
-                  {
-
-                    List? l = snapshot.data as List;
-
-                    return ListView.builder(scrollDirection: Axis.horizontal,itemCount: l!.length,itemBuilder: (context, index) {
-                      return Container(
-                        height: 100,
-                        width: 100,
-                        color: Colors.black26,
-                        margin: EdgeInsets.all(10),
-                        child: Text("${l[index]}"),
-                      );
-                    },);
-                  }
-                  else if (snapshot.hasError){
-                    return Text("No data found");
-                  }
-                  else
-                  {
-                    return Text("No data found");
-                  }
-                }
-                return Center(child: CircularProgressIndicator());
-              },
-            ),
-          )
-        ],
-      ),
+                      await Model.prefs!.setInt("abc", cnt!);
+                      setState(() {});
+                    },
+                    child: Text("Increment")),
+              ],
+            )
+          : Center(child: Text("Please Wait...")),
     );
   }
 }
